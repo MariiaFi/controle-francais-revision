@@ -71,6 +71,7 @@
     .stats {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       background: #2f1349;
       color: white;
       padding: 0.8rem 1.5rem;
@@ -80,6 +81,13 @@
       font-size: 1.1rem;
       flex-wrap: wrap;
       gap: 1rem;
+    }
+    .score-pourcent {
+      background: #ffd966;
+      color: #2d0f4b;
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-size: 1.2rem;
     }
     .progression {
       background: #d7c2fc;
@@ -195,8 +203,46 @@
       align-items: center;
       justify-content: space-between;
     }
-    .feedback-ico {
+    /* écran récap */
+    .recap-box {
+      background: white;
+      border-radius: 50px;
+      padding: 2.5rem;
+      text-align: center;
+      border: 5px solid #401a72;
+      margin: 2rem 0;
+    }
+    .recap-titre {
+      font-size: 2.5rem;
+      color: #2b0b3f;
+      margin-bottom: 1.5rem;
+    }
+    .recap-score {
+      font-size: 3rem;
+      font-weight: 800;
+      background: #f2e5ff;
+      display: inline-block;
+      padding: 1rem 3rem;
+      border-radius: 120px;
+      margin: 1rem 0;
+    }
+    .recap-message {
+      font-size: 2rem;
+      padding: 1.2rem;
+      background: #ffe68f;
+      border-radius: 60px;
+    }
+    .btn-recommencer {
+      background: #401a72;
+      color: white;
       font-size: 1.8rem;
+      padding: 1rem 3rem;
+      border: none;
+      border-radius: 60px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 2rem;
+      border-bottom: 6px solid #160129;
     }
     /* mobile */
     @media (max-width: 600px) {
@@ -214,9 +260,10 @@
     <button class="mode-btn" data-mode="cartes">🃏 CARTES</button>
     <button class="mode-btn" data-mode="entrainement">⚡ ENTRAÎNEMENT</button>
   </div>
-  <div class="stats">
+  <div class="stats" id="statsPanel">
     <span id="scoreAff">⭐ Score : 0</span>
-    <span id="compteAff">📌 0 / 60</span>
+    <span id="compteAff">📌 0 / 0</span>
+    <span class="score-pourcent" id="pourcentAff">0%</span>
     <div class="progression"><div class="progression-fill" id="progFill"></div></div>
   </div>
 
@@ -302,26 +349,26 @@
   let modeActuel = 'quiz'; // quiz / cartes / entrainement
   let score = 0;
   let indexActuel = 0;
-  let historique = []; // pour piocher aléatoirement sans répétition sur une session (par mode)
+  let historique = []; 
   let reponseDonnee = false;
-  let correctionAffichee = false;
   
   // ---------- FILTRER questions compatibles avec mode + mélange -----
   function getQuestionsDuMode(mode) {
-    let filtrees = questions.filter(q => q.modeCompat === mode || q.modeCompat === 'quiz' && mode==='quiz' || q.modeCompat === 'flash' && mode==='cartes' || q.modeCompat === 'texte' && mode==='entrainement');
-    if(mode==='quiz') filtrees = questions.filter(q => q.modeCompat==='quiz' || q.modeCompat==='qcm'); 
-    if(mode==='cartes') filtrees = questions.filter(q => q.modeCompat==='flash' || q.modeCompat==='cartes');
-    if(mode==='entrainement') filtrees = questions.filter(q => q.modeCompat==='texte' || q.modeCompat==='entrainement');
+    let filtrees = [];
+    if (mode === 'quiz') filtrees = questions.filter(q => q.modeCompat === 'quiz' || q.modeCompat === 'qcm');
+    else if (mode === 'cartes') filtrees = questions.filter(q => q.modeCompat === 'flash' || q.modeCompat === 'cartes');
+    else filtrees = questions.filter(q => q.modeCompat === 'texte' || q.modeCompat === 'entrainement');
     // mélange
     return filtrees.sort(()=> Math.random()-0.5);
   }
   
   function majStats() {
-    document.getElementById('scoreAff').innerText = `⭐ Score : ${score}`;
     const total = historique.length;
-    const fait = indexActuel; // 0-based, mais affichage +1
-    document.getElementById('compteAff').innerText = `📌 ${fait+1} / ${total}`;
-    const prog = total>0 ? ((fait)/total)*100 : 0;
+    const pourcentage = total > 0 ? Math.round((score / total) * 100) : 0;
+    document.getElementById('scoreAff').innerHTML = `⭐ Score : <strong>${score}</strong>`;
+    document.getElementById('compteAff').innerText = `📌 ${indexActuel+1} / ${total}`;
+    document.getElementById('pourcentAff').innerText = pourcentage + '%';
+    const prog = total>0 ? ((indexActuel+1)/total)*100 : 0;
     document.getElementById('progFill').style.width = prog + '%';
   }
 
@@ -330,10 +377,69 @@
     divExp.style.display = 'block';
     divExp.innerText = '📚 ' + texte;
   }
+
+  // ---------- ÉCRAN RÉCAP ----------
+  function afficherRecap() {
+    const total = historique.length;
+    const pourcentage = total > 0 ? Math.round((score / total) * 100) : 0;
+    let message = '';
+    if (pourcentage >= 90) message = '🌟 Excellent travail !';
+    else if (pourcentage >= 70) message = '👏 Très bon niveau !';
+    else if (pourcentage >= 50) message = '📘 Encore un petit effort !';
+    else message = '📚 Il faut revoir la leçon.';
+
+    const recapHTML = `
+      <div class="recap-box">
+        <div class="recap-titre">🎉 QUIZ TERMINÉ</div>
+        <div class="recap-score">${score} / ${total} (${pourcentage}%)</div>
+        <div class="recap-message">${message}</div>
+        <button class="btn-recommencer" id="recommencerQuiz">⟲ Recommencer le quiz</button>
+      </div>
+    `;
+    document.getElementById('contenuPrincipal').innerHTML = recapHTML;
+    document.getElementById('explicationPedago').style.display = 'none';
+    document.getElementById('navBottom').innerHTML = '';
+    document.getElementById('statsPanel').style.display = 'flex'; // on garde les stats visibles
+    document.getElementById('statsPanel').innerHTML = ` 
+      <span id="scoreAff">⭐ Score : ${score}</span>
+      <span id="compteAff">📌 ${total} / ${total}</span>
+      <span class="score-pourcent" id="pourcentAff">${pourcentage}%</span>
+      <div class="progression"><div class="progression-fill" style="width:100%"></div></div>
+    `;
+    document.getElementById('recommencerQuiz').addEventListener('click', ()=>{
+      resetQuiz();
+    });
+  }
+
+  function resetQuiz() {
+    historique = getQuestionsDuMode('quiz');
+    indexActuel = 0;
+    score = 0;
+    reponseDonnee = false;
+    afficherQuestion();
+    // restaure la barre de stats normale
+    document.getElementById('statsPanel').innerHTML = `
+      <span id="scoreAff">⭐ Score : 0</span>
+      <span id="compteAff">📌 0 / ${historique.length}</span>
+      <span class="score-pourcent" id="pourcentAff">0%</span>
+      <div class="progression"><div class="progression-fill" id="progFill" style="width:0%"></div></div>
+    `;
+    document.getElementById('navBottom').innerHTML = `
+      <button class="bouton-secondaire" id="btnValider">✅ Valider</button>
+      <button class="bouton-secondaire" id="btnSuivant">⏩ Suivant</button>
+    `;
+    document.getElementById('btnValider').addEventListener('click', validerReponse);
+    document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
+  }
   
   function afficherQuestion() {
     if(historique.length===0) {
       document.getElementById('contenuPrincipal').innerHTML = '<div class="carte-question">Aucune question pour ce mode</div>';
+      return;
+    }
+    // si on arrive à la fin (indexActuel == historique.length) on affiche récap
+    if (indexActuel >= historique.length) {
+      afficherRecap();
       return;
     }
     const q = historique[indexActuel];
@@ -373,41 +479,44 @@
 
   function validerReponse() {
     if (reponseDonnee) return;
-    const q = historique[indexActuel];
-    let bonne = false;
-    let reponseUtilisateur = '';
     if (modeActuel === 'cartes') { 
       alert('Clique sur la carte pour voir la réponse !'); 
       return; 
     }
+    const q = historique[indexActuel];
+    let bonne = false;
     if (q.options) {
       const selected = document.querySelector('.option.selected');
       if (!selected) { alert('Choisis une réponse !'); return; }
       const idx = parseInt(selected.dataset.idx);
-      reponseUtilisateur = q.options[idx];
       bonne = (idx === q.bonne);
     } else {
       const input = document.getElementById('reponseLibre');
       if (!input) return;
-      reponseUtilisateur = input.value.trim().toLowerCase().replace(/\s+/g,' ');
+      const reponseUtilisateur = input.value.trim().toLowerCase().replace(/\s+/g,' ');
       bonne = (reponseUtilisateur === q.bonne.toLowerCase());
     }
     if (bonne) score++;
     afficheExplication(q.explication || (bonne ? '✅ Bonne réponse !' : '❌ Revois la notion.'));
     reponseDonnee = true;
     majStats();
-    // MAJ score affiché
-    document.getElementById('scoreAff').innerText = `⭐ Score : ${score}`;
   }
 
   function questionSuivante() {
+    if (modeActuel === 'cartes') {
+      if (indexActuel < historique.length - 1) indexActuel++; else indexActuel = 0;
+      afficherQuestion();
+      return;
+    }
+    // mode quiz ou entrainement
     if (indexActuel < historique.length - 1) {
       indexActuel++;
+      afficherQuestion();
     } else {
-      // retour au début
-      indexActuel = 0;
+      // fin du quiz : on passe à l'écran récap (en incrémentant pour déclencher le recap)
+      indexActuel++; // pour que index == length
+      afficherQuestion(); // sera capté par la condition d'affichage récap
     }
-    afficherQuestion();
   }
   
   function changerMode(mode) {
@@ -417,15 +526,28 @@
     historique = getQuestionsDuMode(mode);
     indexActuel = 0;
     score = 0;
+    reponseDonnee = false;
+    
+    if (mode === 'quiz') {
+      // boutons valider / suivant
+      document.getElementById('navBottom').innerHTML = `
+        <button class="bouton-secondaire" id="btnValider">✅ Valider</button>
+        <button class="bouton-secondaire" id="btnSuivant">⏩ Suivant</button>
+      `;
+      document.getElementById('btnValider').addEventListener('click', validerReponse);
+      document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
+    } else if (mode === 'cartes') {
+      document.getElementById('navBottom').innerHTML = `<button class="bouton-secondaire" id="btnSuivant">⏩ Carte suivante</button>`;
+      document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
+    } else { // entrainement
+      document.getElementById('navBottom').innerHTML = `
+        <button class="bouton-secondaire" id="btnValider">✅ Valider</button>
+        <button class="bouton-secondaire" id="btnSuivant">⏩ Suivant</button>
+      `;
+      document.getElementById('btnValider').addEventListener('click', validerReponse);
+      document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
+    }
     afficherQuestion();
-    document.getElementById('explicationPedago').style.display = 'none';
-    // bouton validation / suivant
-    document.getElementById('navBottom').innerHTML = `
-      <button class="bouton-secondaire" id="btnValider">✅ Valider</button>
-      <button class="bouton-secondaire" id="btnSuivant">⏩ Suivant</button>
-    `;
-    document.getElementById('btnValider').addEventListener('click', validerReponse);
-    document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
   }
 
   // initialisation
