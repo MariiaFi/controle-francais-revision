@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>Révise ton français · Monstres & Mots</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            background: #f4f7fb;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .app-container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0, 10, 30, 0.08), 0 8px 16px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            padding: 24px 20px 32px 20px;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #1A2E45;
+            padding-left: 8px;
+            margin-bottom: 4px;
+        }
+
+        .sous-titre {
+            color: #4a5f73;
+            margin-bottom: 24px;
+            padding-left: 8px;
+            font-weight: 400;
+            font-size: 1rem;
+            border-left: 4px solid #9bb7d4;
+            padding-left: 16px;
+        }
+
+        /* onglets */
+        .mode-switch {
+            display: flex;
+            gap: 12px;
+            background: #eef2f6;
+            padding: 6px;
+            border-radius: 60px;
+            margin-bottom: 28px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px 6px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .mode-btn.actif {
+            background: white;
+            box-shadow: 0 4px 10px rgba(0, 20, 40, 0.08);
+            color: #003b6f;
+        }
+
+        /* zones */
+        .zone-mode {
+            display: block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ========== QUIZ ========== */
+        .progression-barre {
+            background: #e3eaf0;
+            height: 8px;
+            border-radius: 20px;
+            margin: 8px 0 16px 0;
+        }
+
+        .progression-remplie {
+            background: #1e5f8e;
+            width: 0%;
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.2s ease;
+        }
+
+        .en-tete-quiz {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-weight: 500;
+            color: #1A2E45;
+            margin-top: 8px;
+        }
+
+        .score-badge {
+            background: #dee7f0;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+        }
+
+        .question-texte {
+            background: #f0f5fa;
+            padding: 28px 20px;
+            border-radius: 24px;
+            font-size: 1.3rem;
+            font-weight: 500;
+            line-height: 1.4;
+            margin: 16px 0 24px 0;
+            color: #0a2538;
+            border: 1px solid #dae3ec;
+        }
+
+        .reponses-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .rep-btn {
+            background: white;
+            border: 2px solid #d0ddee;
+            border-radius: 60px;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            text-align: left;
+            font-family: inherit;
+            color: #1f3a57;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .rep-btn:hover:not(:disabled) {
+            background: #e1edff;
+            border-color: #7fa2c2;
+        }
+
+        .rep-btn.correct {
+            background: #d4edda;
+            border-color: #2d7a4b;
+            color: #145c32;
+        }
+
+        .rep-btn.incorrect {
+            background: #ffe3e3;
+            border-color: #c76c6c;
+            color: #911e1e;
+            text-decoration: line-through 1px rgba(150,0,0,0.3);
+        }
+
+        .explication-courte {
+            background: #eef4fa;
+            padding: 18px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            border-left: 6px solid #54708f;
+            margin: 16px 0 20px 0;
+            color: #102331;
+        }
+
+        .bouton-suivant, .bouton-recommencer {
+            background: #1e5f8e;
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 16px 20px;
+            border-radius: 50px;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 8px;
+            box-shadow: 0 8px 16px -8px #1e5f8e80;
+        }
+
+        .bouton-suivant:hover:not(:disabled), .bouton-recommencer:hover {
+            background: #0f4166;
+        }
+        .bouton-suivant:disabled {
+            background: #b3c7db;
+            cursor: default;
+            box-shadow: none;
+        }
+
+        /* ========== CARTES ========== */
+        .flashcard-compteur {
+            text-align: right;
+            font-weight: 500;
+            color: #2a4b6e;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .flashcard {
+            background: transparent;
+            perspective: 1500px;
+            margin-bottom: 24px;
+            cursor: pointer;
+        }
+
+        .flashcard-interieur {
+            position: relative;
+            width: 100%;
+            min-height: 280px;
+            transition: transform 0.35s ease;
+            transform-style: preserve-3d;
+            border-radius: 28px;
+            box-shadow: 0 12px 24px -12px rgba(0, 30, 60, 0.25);
+        }
+
+        .flashcard.retournee .flashcard-interieur {
+            transform: rotateY(180deg);
+        }
+
+        .recto, .verso {
+            position: absolute;
+            width: 100%;
+            min-height: 280px;
+            backface-visibility: hidden;
+            background: white;
+            border-radius: 28px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 2px solid #cbdbe9;
+            box-shadow: inset 0 -2px 0 #dae2ec;
+        }
+
+        .recto {
+            background: linear-gradient(145deg, #ffffff, #f7fcff);
+            color: #142b3b;
+            font-size: 1.4rem;
+            font-weight: 500;
+        }
+
+        .verso {
+            background: #e8f0fa;
+            transform: rotateY(180deg);
+            color: #00315c;
+            font-size: 1.2rem;
+            gap: 12px;
+        }
+
+        .verso strong {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #00315c;
+        }
+
+        .verso p {
+            margin-top: 8px;
+            font-style: italic;
+            border-top: 2px dashed #96b4d0;
+            padding-top: 16px;
+            color: #1f415e;
+        }
+
+        .nav-cartes {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 12px 0 8px;
+        }
+
+        .nav-cartes button {
+            background: white;
+            border: 2px solid #c8d9ea;
+            font-size: 1.3rem;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            color: #1e4f73;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 120px;
+        }
+
+        .nav-cartes button:hover:not(:disabled) {
+            background: #dbeafe;
+            border-color: #7d9fc7;
+        }
+
+        .nav-cartes button:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        footer {
+            margin-top: 28px;
+            text-align: center;
+            color: #6c859e;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1>⚡ français·monstre</h1>
+    <div class="sous-titre">mots variables, classes, intrus & étymologie</div>
+
+    <!-- bascule -->
+    <div class="mode-switch">
+        <button class="mode-btn actif" id="btnModeQuiz">📝 Quiz (24)</button>
+        <button class="mode-btn" id="btnModeCartes">🗂️ Cartes (30)</button>
+    </div>
+
+    <!-- ************ MODE QUIZ ************ -->
+    <div id="modeQuiz" class="zone-mode">
+        <div class="progression-barre"><div class="progression-remplie" id="barreProg"></div></div>
+        <div class="en-tete-quiz">
+            <span id="compteurQuestion">0/24</span>
+            <span class="score-badge" id="scoreAffichage">0 pts</span>
+        </div>
+
+        <div id="zoneQuestion" class="question-texte">Chargement...</div>
+
+        <div id="reponsesContainer" class="reponses-grid"></div>
+        <div id="explicationBox" class="explication-courte hidden"></div>
+
+        <button class="bouton-suivant" id="btnSuivant" disabled>Question suivante ➔</button>
+        <button class="bouton-recommencer hidden" id="btnRecommencerQuiz">⇆ Recommencer le quiz</button>
+    </div>
+
+    <!-- ************ MODE CARTES ************ -->
+    <div id="modeCartes" class="zone-mode hidden">
+        <div class="flashcard-compteur" id="compteurCarte">Carte 1 / 30</div>
+
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-interieur" id="flashcardInner">
+                <div class="recto" id="rectoCarte">...</div>
+                <div class="verso" id="versoCarte">
+                    <strong id="versoTitre"></strong>
+                    <p id="versoExplication"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-cartes">
+            <button id="btnPrevCarte" disabled>◀ Préc.</button>
+            <button id="btnNextCarte">Suiv. ▶</button>
+        </div>
+        <p style="text-align: center; margin-top: 12px; color:#435e7a;">👆 cliquer sur la carte = flip</p>
+    </div>
+
+    <footer>contrôle de français · révision active</footer>
+</div>
+
+<script>
+(function() {
+    // ---------- PÉDAGOGIE : données structurées ----------
+    // 24 QUESTIONS QUIZ (avec explications)
+    const questionsQuiz = [
+        // thème monstre sens & étymologie
+        { question: "Dans 'Quasimodo est un monstre à cause de sa bosse', quel sens domine ?", options: ["1 : créature fantastique", "2 : difformité physique", "3 : personne cruelle"], correct: 1, explication: "Sens n°2 : difformité physique (monstre par le corps)." },
+        { question: "Dans 'Ce criminel est un vrai monstre', quel sens ?", options: ["créature fantastique", "difformité", "personne cruelle"], correct: 2, explication: "Sens n°3 : personne cruelle, moralement monstrueuse." },
+        { question: "Étymologie : 'monstre' vient du latin 'monstrum', lié à deux verbes. Lesquels ?", options: ["monere / monstrare (avertir / montrer)", "mordere / monere (mordre / avertir)", "monstrare / movere (montrer / bouger)"], correct: 0, explication: "monstrum = avertir (monere) + montrer (monstrare) : ce qui attire l'attention." },
+        { question: "Le monstre, selon son étymologie, est d'abord quelque chose qu'on...", options:["craint et fuit", "montre du doigt (avertit)", "adore secrètement"], correct:1, explication:"Il s'agit d'un prodige qu'on 'montre' et qui 'avertit'."},
+        // variable / invariable
+        { question: "Parmi ces mots, lequel est INVARIABLE ?", options: ["mon", "riaient", "très"], correct: 2, explication: "'très' est un adverbe, toujours invariable. 'mon' (déterminant) s'accorde, 'riaient' (verbe) se conjugue." },
+        { question: "Choisis le mot VARIABLE :", options: ["demain", "méchamment", "possible"], correct: 2, explication: "'possible' est adjectif (variable en genre/nombre). 'demain' adverbe, 'méchamment' adverbe." },
+        { question: "Quel est l'invariable ?", options: ["des", "celui-ci", "pour"], correct: 2, explication: "'pour' préposition invariable. 'des' article/dét variable, 'celui-ci' pronom variable." },
+        { question: "Trouve l'intrus (classe différente) : mon, riaient, sac, demain", options: ["mon", "riaient", "sac", "demain"], correct: 3, explication: "'demain' adverbe invariable ; les autres sont variables (dét, verbe, nom)." },
+        // classe grammaticale (phrases)
+        { question: "Dans 'Nous traversons une petite cour', 'traversons' est ?", options:["nom","verbe","adjectif"], correct:1, explication:"C'est le verbe traverser (1re pers. pluriel)."},
+        { question: "'des' dans 'des histoires' : nature ?", options:["préposition","déterminant (article indéfini)","pronom"], correct:1, explication:"'des' = article indéfini, variable (détermine un nom)."},
+        { question: "'noires' dans 'des ombres noires' est ?", options:["nom","adjectif qualificatif","adverbe"], correct:1, explication:"Adjectif, s'accorde avec 'ombres'."},
+        { question: "'s’allongeaient' (imparfait) : classe ?", options:["pronom + verbe","adverbe","nom"], correct:0, explication:"Verbe pronominal s'allonger (verbe)."},
+        { question: "Dans 'de tous âges', 'âges' est ?", options:["verbe","nom commun","adjectif"], correct:1, explication:"Nom commun, masculin pluriel."},
+        // intrus
+        { question: "Intrus ? ces / un / ma / ses / nous / ce / des", options:["ces","un","nous","des"], correct:2, explication:"'nous' = pronom personnel ; les autres sont déterminants/adjectifs."},
+        { question: "Intrus ? heureux / ingénieux / magnifique / superbe / honte / élégant", options:["heureux","honte","élégant"], correct:1, explication:"'honte' = nom ; les autres adjectifs qualificatifs."},
+        { question: "Intrus ? tu / eux / ces / vous / nous / toi / lui", options:["tu","ces","lui"], correct:1, explication:"'ces' déterminant, les autres sont pronoms personnels."},
+        { question: "Intrus ? tablier / crier / plier / s’ennuyer / prier / grincer", options:["tablier","plier","grincer"], correct:0, explication:"'tablier' = nom ; tous les autres verbes."},
+        // compléter les 24 (mix)
+        { question: "Le mot 'monstre' au sens 1 renvoie à :", options:["créature imaginaire","personne méchante","handicap"], correct:0, explication:"Sens classique : être fabuleux."},
+        { question: "'Monstrum' latin signifiait d'abord ?", options:["miracle qui avertit","grande taille","combat"], correct:0, explication:"prodige envoyé par les dieux pour montrer un signe."},
+        { question: "Variable ou invariable ? 'malade'", options:["variable (adjectif)","invariable (adverbe)"], correct:0, explication:"'malade' adjectif s'accorde."},
+        { question: "Nature de 'pour' ?", options:["préposition","déterminant","nom"], correct:0, explication:"'pour' préposition invariable."},
+        { question: "Dans 'la rue déserte', 'déserte' est ?", options:["adjectif","verbe","nom"], correct:0, explication:"Adjectif qualificatif."},
+        { question: "Intrus : mon / ton / son / chat / leur", options:["mon","chat","leur"], correct:1, explication:"'chat' nom ; les autres déterminants possessifs."},
+        { question: "Quel sens pour 'Ce monstre de film' ? (sens figuré)", options:["créature","difforme","personne cruelle"], correct:2, explication:"ici 'monstre' = personne odieuse (sens 3)."},
+        { question: "Dernière : lequel est invariable ? 'comédien' / 'possible' / 'méchamment'", options:["comédien","possible","méchamment"], correct:2, explication:"méchamment = adverbe invariable."}
+    ];
+
+    // 30 FLASHCARDS (recto = devinette, verso = réponse + mini explication)
+    const flashcards = [
+        { recto: "Le mot « monstre » vient d’un mot latin. Lequel ?", verso: "monstrum", explication: "Lié à monere (avertir) et monstrare (montrer)." },
+        { recto: "Cite un sens du mot « monstre ».", verso: "créature fantastique / difformité / personne cruelle", explication: "Trois sens possibles : être imaginaire, physiquement anormal, ou moralement atroce." },
+        { recto: "« mon » est-il variable ?", verso: "Oui, déterminant possessif", explication: "Il s’accorde (mon/ma/mes) avec le nom." },
+        { recto: "« riaient » variable ?", verso: "Oui, verbe rire", explication: "Se conjugue (personne, nombre, temps)." },
+        { recto: "« très » variable ?", verso: "Non, adverbe invariable", explication: "Très intensifie, ne change pas." },
+        { recto: "« malade » variable ?", verso: "Oui, adjectif", explication: "s'écrit malade/malades." },
+        { recto: "« sac » variable ?", verso: "Oui, nom commun", explication: "sac / sacs." },
+        { recto: "« pour » variable ?", verso: "Invariable, préposition", explication: "Ne s'accorde pas." },
+        { recto: "« possible » variable ?", verso: "Oui, adjectif", explication: "possible/possibles." },
+        { recto: "« demain » variable ?", verso: "Invariable, adverbe", explication: "indique le temps, ne change pas." },
+        { recto: "« celui-ci » variable ?", verso: "Oui, pronom démonstratif", explication: "celui-ci / celle-ci / ceux-ci..." },
+        { recto: "« méchamment » variable ?", verso: "Invariable, adverbe", explication: "formé sur méchant + ment." },
+        { recto: "« des » (article) variable ?", verso: "Oui, déterminant", explication: "devient 'de' + adj. parfois, mais variable." },
+        { recto: "« comédien » variable ?", verso: "Oui, nom / adjectif", explication: "comédien, comédienne." },
+        { recto: "classe de « noires » (des robes noires)", verso: "Adjectif qualificatif", explication: "s'accorde en genre et nombre." },
+        { recto: "classe de « s’allongeaient »", verso: "Verbe pronominal", explication: "à l'imparfait, 3e pers. pluriel." },
+        { recto: "classe de « âges » (de tous âges)", verso: "Nom commun", explication: "masculin pluriel." },
+        { recto: "Intrus ? ces / un / ma / nous", verso: "Intrus = nous", explication: "pronom personnel ; les autres déterminants." },
+        { recto: "Intrus ? heureux / honte / magnifique", verso: "honte (nom) ; autres adjectifs", explication: "astuce : honte peut-on mettre très ? non." },
+        { recto: "Intrus ? tu / eux / ces / vous", verso: "ces (déterminant)", explication: "les autres sont pronoms personnels." },
+        { recto: "Intrus ? tablier / crier / plier / grincer", verso: "tablier (nom)", explication: "crier, plier, grincer = verbes." },
+        { recto: "Que montre l’étymologie du monstre ?", verso: "quelque chose qu'on montre, qui avertit", explication: "prodiges, signes divins." },
+        { recto: "Nature de « traversons » ?", verso: "verbe traverser", explication: "1re pers. pluriel présent." },
+        { recto: "Nature de « petite » (une petite cour)", verso: "adjectif qualificatif", explication: "épithète." },
+        { recto: "Le monstre (sens 2) ex:", verso: "difformité physique", explication: "ex: bossu, personne avec handicap apparent." },
+        { recto: "Sens 3 du mot monstre", verso: "personne cruelle, mauvaise", explication: "ex: 'un monstre d'égoïsme'." },
+        { recto: "Sens 1 du mot monstre", verso: "créature fantastique (dragon, cyclope)", explication: "dans les mythes." },
+        { recto: "Invariable ? oui/non : « possible »", verso: "non, variable (adjectif)", explication: "masculin/féminin/pluriel." },
+        { recto: "Invariable ? oui/non : « demain »", verso: "oui, adverbe", explication: "toujours pareil." },
+        { recto: "Terminons : « un » variable ?", verso: "Oui (déterminant article)", explication: "un / une / des." }
+    ];
+
+    // ---------- ETAT GLOBAL ----------
+    let mode = "quiz"; // "quiz" ou "cartes"
+    let quizIndex = 0;
+    let quizReponsesDonnees = []; // true/false pour chaque question
+    let quizScore = 0;
+    let quizTermine = false;
+    let questionsMelangees = [];
+
+    // cartes
+    let carteIndex = 0;
+
+    // DOM elements
+    const btnModeQuiz = document.getElementById('btnModeQuiz');
+    const btnModeCartes = document.getElementById('btnModeCartes');
+    const divQuiz = document.getElementById('modeQuiz');
+    const divCartes = document.getElementById('modeCartes');
+
+    const questionTexte = document.getElementById('zoneQuestion');
+    const reponsesDiv = document.getElementById('reponsesContainer');
+    const explicationBox = document.getElementById('explicationBox');
+    const btnSuivant = document.getElementById('btnSuivant');
+    const btnRecommencer = document.getElementById('btnRecommencerQuiz');
+    const compteurSpan = document.getElementById('compteurQuestion');
+    const scoreSpan = document.getElementById('scoreAffichage');
+    const barreProg = document.getElementById('barreProg');
+
+    // cartes DOM
+    const flashcardDiv = document.getElementById('flashcard');
+    const rectoCarte = document.getElementById('rectoCarte');
+    const versoTitre = document.getElementById('versoTitre');
+    const versoExplication = document.getElementById('versoExplication');
+    const btnPrev = document.getElementById('btnPrevCarte');
+    const btnNext = document.getElementById('btnNextCarte');
+    const compteurCarte = document.getElementById('compteurCarte');
+
+    // ---------- FONCTIONS QUIZ ----------
+    function demarrerQuiz() {
+        // mélanger et prendre 24 questions (mais on a déjà 24)
+        questionsMelangees = [...questionsQuiz].sort(() => Math.random() - 0.5);
+        quizIndex = 0;
+        quizReponsesDonnees = new Array(questionsMelangees.length).fill(null);
+        quizScore = 0;
+        quizTermine = false;
+        btnRecommencer.classList.add('hidden');
+        btnSuivant.classList.remove('hidden');
+        btnSuivant.disabled = true;
+        afficherQuestionQuiz();
+        mettreAJourCompteurScore();
+    }
+
+    function afficherQuestionQuiz() {
+        if (quizTermine || quizIndex >= questionsMelangees.length) {
+            finQuiz();
+            return;
+        }
+        const q = questionsMelangees[quizIndex];
+        questionTexte.innerText = q.question;
+        reponsesDiv.innerHTML = '';
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'rep-btn';
+            btn.innerText = opt;
+            btn.dataset.optIdx = idx;
+            btn.onclick = () => repondreQuiz(idx);
+            reponsesDiv.appendChild(btn);
+        });
+        explicationBox.classList.add('hidden');
+        btnSuivant.disabled = true;
+
+        // désactiver si déjà répondu (ex: retour)
+        const repPrec = quizReponsesDonnees[quizIndex];
+        if (repPrec !== null) {
+            const tousBtns = document.querySelectorAll('.rep-btn');
+            tousBtns.forEach(btn => { btn.disabled = true; });
+            const bonneIdx = q.correct;
+            tousBtns.forEach((btn, i) => {
+                if (i === bonneIdx) btn.classList.add('correct');
+                else if (i === repPrec && repPrec !== bonneIdx) btn.classList.add('incorrect');
+            });
+            explicationBox.innerText = q.explication;
+            explicationBox.classList.remove('hidden');
+        }
+    }
+
+    function repondreQuiz(choixIdx) {
+        if (quizReponsesDonnees[quizIndex] !== null) return; // déjà répondu
+        const q = questionsMelangees[quizIndex];
+        const estCorrecte = (choixIdx === q.correct);
+        if (estCorrecte) quizScore++;
+        quizReponsesDonnees[quizIndex] = choixIdx;
+
+        const tousBtns = document.querySelectorAll('.rep-btn');
+        tousBtns.forEach(btn => btn.disabled = true);
+        tousBtns.forEach((btn, i) => {
+            if (i === q.correct) btn.classList.add('correct');
+            else if (i === choixIdx && !estCorrecte) btn.classList.add('incorrect');
+        });
+
+        explicationBox.innerText = q.explication;
+        explicationBox.classList.remove('hidden');
+        btnSuivant.disabled = false;
+        mettreAJourCompteurScore();
+    }
+
+    function mettreAJourCompteurScore() {
+        const repondu = quizReponsesDonnees.filter(r => r !== null).length;
+        compteurSpan.innerText = `${repondu}/${questionsMelangees.length}`;
+        scoreSpan.innerText = `${quizScore} pts`;
+        let pourcentage = (repondu / questionsMelangees.length) * 100;
+        barreProg.style.width = pourcentage + '%';
+    }
+
+    function finQuiz() {
+        quizTermine = true;
+        let pourcentage = Math.round((quizScore / questionsMelangees.length) * 100);
+        questionTexte.innerText = `✅ Terminé ! Score : ${quizScore}/${questionsMelangees.length} (${pourcentage}%)`;
+        reponsesDiv.innerHTML = '';
+        explicationBox.classList.add('hidden');
+        btnSuivant.classList.add('hidden');
+        btnRecommencer.classList.remove('hidden');
+        compteurSpan.innerText = `${questionsMelangees.length}/${questionsMelangees.length}`;
+        barreProg.style.width = '100%';
+    }
+
+    btnSuivant.addEventListener('click', () => {
+        if (quizIndex + 1 < questionsMelangees.length) {
+            quizIndex++;
+            afficherQuestionQuiz();
+        } else {
+            finQuiz();
+        }
+        mettreAJourCompteurScore();
+    });
+
+    btnRecommencer.addEventListener('click', () => {
+        demarrerQuiz();
+    });
+
+    // ---------- CARTES ----------
+    function afficherCarte(index) {
+        const carte = flashcards[index];
+        rectoCarte.innerText = carte.recto;
+        versoTitre.innerText = carte.verso;
+        versoExplication.innerText = carte.explication;
+        compteurCarte.innerText = `Carte ${index+1} / ${flashcards.length}`;
+        flashcardDiv.classList.remove('retournee');
+        btnPrev.disabled = (index === 0);
+        btnNext.disabled = (index === flashcards.length - 1);
+    }
+
+    flashcardDiv.addEventListener('click', () => {
+        flashcardDiv.classList.toggle('retournee');
+    });
+
+    btnPrev.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (carteIndex > 0) {
+            carteIndex--;
+            afficherCarte(carteIndex);
+        }
+    });
+    btnNext.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (carteIndex < flashcards.length - 1) {
+            carteIndex++;
+            afficherCarte(carteIndex);
+        }
+    });
+
+    // ---------- CHANGEMENT MODE ----------
+    function setMode(m) {
+        mode = m;
+        if (mode === 'quiz') {
+            divQuiz.classList.remove('hidden');
+            divCartes.classList.add('hidden');
+            btnModeQuiz.classList.add('actif');
+            btnModeCartes.classList.remove('actif');
+            demarrerQuiz(); // démarre ou remélange
+        } else {
+            divQuiz.classList.add('hidden');
+            divCartes.classList.remove('hidden');
+            btnModeQuiz.classList.remove('actif');
+            btnModeCartes.classList.add('actif');
+            carteIndex = 0;
+            afficherCarte(0);
+        }
+    }
+
+    btnModeQuiz.addEventListener('click', () => setMode('quiz'));
+    btnModeCartes.addEventListener('click', () => setMode('cartes'));
+
+    // lancement par défaut
+    setMode('quiz');
+})();
+</script>
+</body>
+</html>
