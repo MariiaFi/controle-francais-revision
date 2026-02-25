@@ -162,9 +162,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-direction: column;
     }
     .reponse-flash {
       color: #ffd966;
+      font-size: 2rem;
+    }
+    .indice-flash {
+      font-size: 1.2rem;
+      color: #b39ddb;
+      margin-top: 1rem;
     }
     .zone-saisie {
       width: 100%;
@@ -203,7 +210,6 @@
       align-items: center;
       justify-content: space-between;
     }
-    /* écran récap */
     .recap-box {
       background: white;
       border-radius: 50px;
@@ -244,7 +250,6 @@
       margin-top: 2rem;
       border-bottom: 6px solid #160129;
     }
-    /* mobile */
     @media (max-width: 600px) {
       .app { padding: 1rem; }
       .question-texte { font-size: 1.4rem; }
@@ -267,7 +272,6 @@
     <div class="progression"><div class="progression-fill" id="progFill"></div></div>
   </div>
 
-  <!-- zone principale modifiée par js -->
   <div id="contenuPrincipal"></div>
   <div id="explicationPedago" class="explication" style="display: none;"></div>
   <div class="flex-row" id="navBottom"></div>
@@ -275,20 +279,21 @@
 
 <script>
 (function(){
-  // ---------- ÉNORME BASE DE DONNÉES ( 70+ questions / notions ) -------------
+  // ---------- BASE DE DONNÉES (70+ questions) -------------
   const questions = [];
 
   function ajoutQ(module, type, question, options, bonne, explication, modeCompat = 'quiz') {
     questions.push({ module, type, question, options, bonne, explication, modeCompat });
   }
 
-  // -------------------- 1️⃣ MOT MONSTRE ------------------------------------
+  // 1️⃣ MOT MONSTRE
   ajoutQ('monstre','qcm', 'Quel est le sens figuré du mot "monstre" ?', ['Être fantastique','Difformité physique','Personne cruelle','Créature marine'], 2, 'Au figuré, "monstre" désigne une personne d\'une cruauté exceptionnelle. (ex : Barbe Bleue)');
   ajoutQ('monstre','qcm', 'Étymologie : "monstre" vient du latin "monstrum". Que signifie la racine "monere" ?', ['Montrer','Avertir','Naître','Dévorer'], 1, 'Monere = avertir → le monstre est un signe qui avertit d’un danger.');
   ajoutQ('monstre','texte', 'Complète : Barbe Bleue est un mari ____ (cruauté/physique) qui manipule sa femme.', null, 'cruauté', 'On parle de cruauté morale, Barbe Bleue est un monstre au sens figuré.');
   ajoutQ('monstre','qcm', 'Le mot "monstre" partage la même origine que "monstrare". Que signifie monstrare ?', ['Avertir','Montrer','Effrayer','Punir'], 1, 'Monstrare = montrer → le monstre montre, il attire l’attention.');
   ajoutQ('monstre','texte', 'La ____ de Barbe Bleue la pousse à ouvrir la porte interdite.', null, 'curiosité', 'La curiosité est un défaut central du conte.');
   ajoutQ('monstre','flash', 'Être fantastique / difformité / personne cruelle', null, 'Les trois sens du mot MONSTRE', '');
+  
   // 2️⃣ FORMES DE PHRASES
   ajoutQ('phrase','qcm', '"Ne mange jamais ceci." est une phrase :', ['Déclarative','Interrogative','Impérative','Exclamative'], 2, 'Impérative (ordre) et négative (ne… jamais).');
   ajoutQ('phrase','qcm', 'Où se place "rien" dans une négation ?', ['avant le verbe','après le verbe','avant ne','à la fin'], 1, 'ne + verbe + rien (ex : je ne vois rien).');
@@ -296,12 +301,15 @@
   ajoutQ('phrase','texte', 'Transforme à la négative : "Il voit quelqu\'un" → "Il ne voit ____"', null, 'personne', 'ne … personne (personne remplace quelqu\'un).');
   ajoutQ('phrase','qcm', 'Transformer au négatif : "Nous mangeons encore" → ne … ?', ['jamais','plus','rien','guère'], 1, 'ne … plus (encore → plus).');
   ajoutQ('phrase','flash', 'ne … pas / jamais / rien / plus / personne / guère / point', null, 'Mots de négation', '');
+  
   // 3️⃣ SIMPLE / COMPLEXE
   ajoutQ('simple','qcm', 'Combien de verbes conjugués dans une phrase simple ?', ['0','1','2','plusieurs'], 1, 'Une phrase simple = 1 verbe conjugué.');
   ajoutQ('simple','qcm', '"Les ogres hurlaient et les enfants tremblaient." est une phrase ?', ['simple','complexe','non verbale'], 1, 'Deux verbes = complexe.');
+  
   // 4️⃣ VERBALE / NON VERBALE
   ajoutQ('verbale','qcm', 'Qu\'est-ce qu\'une phrase non verbale ?', ['pas de verbe','verbe au participe','plusieurs verbes'], 0, 'Sans aucun verbe conjugué. Ex : "Quel monstre !"');
   ajoutQ('verbale','texte', 'Phrase verbale ou non ? "Terreur dans la nuit" :', null, 'non verbale', 'Absence de verbe conjugué.');
+  
   // 5️⃣ CLASSES GRAMMATICALES
   ajoutQ('classe','qcm', 'Quelle est la classe de "nous" ?', ['déterminant','pronom','nom','adverbe'], 1, 'pronom personnel.');
   ajoutQ('classe','qcm', '"bâtisse" est un :', ['verbe','nom','adjectif'], 1, 'nom commun.');
@@ -311,26 +319,31 @@
   ajoutQ('classe','qcm', '"mangent" :', ['verbe','nom','adjectif'], 0, 'verbe manger, 3e pluriel.');
   ajoutQ('classe','qcm', '"bientôt" est un mot :', ['variable','invariable'], 1, 'invariable (adverbe).');
   ajoutQ('classe','qcm', '"le" dans "le bureau" :', ['pronom','déterminant'], 1, 'déterminant article défini.');
+  
   // 6️⃣ VARIABLE / INVARIABLE
   ajoutQ('var','qcm', 'Parmi ces mots, lequel est variable ?', ['très','pour','mon','demain'], 2, 'mon (déterminant) s\'accorde (ma, mes).');
   ajoutQ('var','qcm', '"riaient" est variable ? oui, pourquoi ?', ['car adverbe','car verbe','car nom'], 1, 'C\'est un verbe, s\'accorde avec sujet.');
   ajoutQ('var','qcm', '"méchamment" est :', ['variable','invariable'], 1, 'invariable (adverbe en -ment).');
   ajoutQ('var','texte', 'Le mot "celui-ci" est-il variable ? (oui/non)', null, 'oui', 'pronom démonstratif, varie en genre/nombre (celui/celle/ceux).');
   ajoutQ('var','qcm', 'Le participe "comédien" est :', ['variable','invariable'], 0, 'nom, variable en nombre (comédiens).');
+  
   // 7️⃣ IMPARFAIT
   ajoutQ('imp','qcm', 'Verbe à l\'imparfait ?', ['il rit','il riait','il rira'], 1, 'riait = terminaison -ait.');
   ajoutQ('imp','qcm', 'Trouver l\'intrus : était, effrayait, savait, [mangeront]', null, 3, 'mangeront = futur simple.');
   ajoutQ('imp','texte', 'Conjugue "lancer" à l\'imparfait, 3e pers. sing.', null, 'lançait', 'Attention cédille : nous lancions, il lançait.');
   ajoutQ('imp','qcm', 'Imparfait de "crier" (nous) ?', ['criions','criions','crierions'], 1, 'nous criions (deux i).');
   ajoutQ('imp','flash', 'Terminaisons imparfait : ais, ais, ait, ions, iez, aient', null, '✅');
+  
   // 8️⃣ VOCABULAIRE PEUR
   ajoutQ('peur','qcm', 'Peur très forte :', ['trac','angoisse','phobie','inquiétude'], 2, 'phobie = peur intense et irraisonnée.');
   ajoutQ('peur','qcm', 'Laquelle est une expression de peur ?', ['avoir la chair de poule','avoir la main verte','avoir un poil dans la main'], 0, 'chair de poule = peur / froid.');
   ajoutQ('peur','texte', 'Transforme : "La peur" → verbe "effrayer" : il _______ (sujet : le monstre)', null, 'effraye', 'ou effraie (les deux ok).');
+  
   // 9️⃣ TRANSFORMATION AFF/NEG/INT
   ajoutQ('transf','qcm', 'Transforme en négatif : "Il y a quelqu\'un"', ['Il n\'y a personne','Il n\'y a pas quelqu\'un','Il n\'y a rien'], 0, 'ne…personne.');
   ajoutQ('transf','qcm', 'Type de phrase : "Pourrais-tu fermer la porte ?"', ['déclarative','interrogative','impérative'], 1, 'interrogative (inversion sujet).');
-  // 🔟 PLURIEL (obligatoire : 20 transformations)
+  
+  // 🔟 PLURIEL
   ajoutQ('pluriel','qcm', 'Au pluriel : "Le monstre est effrayant" →', ['Les monstres sont effrayant','Les monstres sont effrayants','Le monstre sont effrayants'], 1, 'accord nom, verbe, adjectif.');
   ajoutQ('pluriel','texte', 'Pluriel de : "La petite ogresse était cruelle."', null, 'Les petites ogresses étaient cruelles', 'déterminant, nom, adjectif, verbe : tous au pluriel.');
   ajoutQ('pluriel','qcm', 'Pluriel de "ce chien méchant" →', ['ces chiens méchants','ces chiens méchant','ce chiens méchants'], 0, 'ce → ces, chien → chiens, méchant → méchants.');
@@ -339,29 +352,27 @@
   ajoutQ('pluriel','qcm', 'Au singulier : "Les monstres étaient monstrueux."', ['Le monstre était monstrueux','Le monstre étaient monstrueux','Les monstre était monstrueux'], 0, 'tout s\'accorde au singulier.');
   ajoutQ('pluriel','qcm', 'Singulier de "Des élèves entraient" :', ['Un élève entrait','Un élève entraient','Des élève entrait'], 0, 'déterminant un, verbe entrait.');
   ajoutQ('pluriel','flash', 'Le → Les ; Un → Des ; Ce → Ces ; Elle → Elles ; Était → Étaient', null, 'règles du pluriel');
-  for (let i=0;i<7;i++) { // on en rajoute pour atteindre >60 facile
+  for (let i=0;i<7;i++) {
     ajoutQ('pluriel','qcm', 'Pluriel : "L\'ogre répétait la menace."', ['Les ogres répétaient les menaces','L\'ogres répétaient la menace','Les ogre répétait les menaces'], 0, 'ogre→ogres, répétait→répétaient, menace→menaces.');
   }
 
-  // --- on dépasse 70 questions, parfait ---
-  
-  // ---------- ÉTAT GLOBAL ----------
-  let modeActuel = 'quiz'; // quiz / cartes / entrainement
+  // ---------- ÉTAT ----------
+  let modeActuel = 'quiz';
   let score = 0;
   let indexActuel = 0;
-  let historique = []; 
+  let historique = [];
   let reponseDonnee = false;
-  
-  // ---------- FILTRER questions compatibles avec mode + mélange -----
+  let flashRevele = false; // pour les cartes
+
+  // Filtrage selon le mode
   function getQuestionsDuMode(mode) {
     let filtrees = [];
     if (mode === 'quiz') filtrees = questions.filter(q => q.modeCompat === 'quiz' || q.modeCompat === 'qcm');
     else if (mode === 'cartes') filtrees = questions.filter(q => q.modeCompat === 'flash' || q.modeCompat === 'cartes');
     else filtrees = questions.filter(q => q.modeCompat === 'texte' || q.modeCompat === 'entrainement');
-    // mélange
     return filtrees.sort(()=> Math.random()-0.5);
   }
-  
+
   function majStats() {
     const total = historique.length;
     const pourcentage = total > 0 ? Math.round((score / total) * 100) : 0;
@@ -378,7 +389,7 @@
     divExp.innerText = '📚 ' + texte;
   }
 
-  // ---------- ÉCRAN RÉCAP ----------
+  // Récapitulatif
   function afficherRecap() {
     const total = historique.length;
     const pourcentage = total > 0 ? Math.round((score / total) * 100) : 0;
@@ -399,11 +410,10 @@
     document.getElementById('contenuPrincipal').innerHTML = recapHTML;
     document.getElementById('explicationPedago').style.display = 'none';
     document.getElementById('navBottom').innerHTML = '';
-    document.getElementById('statsPanel').style.display = 'flex'; // on garde les stats visibles
     document.getElementById('statsPanel').innerHTML = ` 
-      <span id="scoreAff">⭐ Score : ${score}</span>
-      <span id="compteAff">📌 ${total} / ${total}</span>
-      <span class="score-pourcent" id="pourcentAff">${pourcentage}%</span>
+      <span>⭐ Score : ${score}</span>
+      <span>📌 ${total} / ${total}</span>
+      <span class="score-pourcent">${pourcentage}%</span>
       <div class="progression"><div class="progression-fill" style="width:100%"></div></div>
     `;
     document.getElementById('recommencerQuiz').addEventListener('click', ()=>{
@@ -416,52 +426,57 @@
     indexActuel = 0;
     score = 0;
     reponseDonnee = false;
-    afficherQuestion();
-    // restaure la barre de stats normale
-    document.getElementById('statsPanel').innerHTML = `
-      <span id="scoreAff">⭐ Score : 0</span>
-      <span id="compteAff">📌 0 / ${historique.length}</span>
-      <span class="score-pourcent" id="pourcentAff">0%</span>
-      <div class="progression"><div class="progression-fill" id="progFill" style="width:0%"></div></div>
-    `;
-    document.getElementById('navBottom').innerHTML = `
-      <button class="bouton-secondaire" id="btnValider">✅ Valider</button>
-      <button class="bouton-secondaire" id="btnSuivant">⏩ Suivant</button>
-    `;
-    document.getElementById('btnValider').addEventListener('click', validerReponse);
-    document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
+    changerMode('quiz'); // on réinitialise le mode quiz
   }
-  
+
+  // Affichage question courante
   function afficherQuestion() {
-    if(historique.length===0) {
+    if (historique.length === 0) {
       document.getElementById('contenuPrincipal').innerHTML = '<div class="carte-question">Aucune question pour ce mode</div>';
       return;
     }
-    // si on arrive à la fin (indexActuel == historique.length) on affiche récap
     if (indexActuel >= historique.length) {
-      afficherRecap();
+      if (modeActuel === 'quiz') afficherRecap();
+      else {
+        // pour cartes ou entrainement, on revient au début
+        indexActuel = 0;
+        afficherQuestion();
+      }
       return;
     }
+
     const q = historique[indexActuel];
-    let html = `<div class="carte-question"><div class="question-texte">${q.question}</div>`;
-    if (q.options && Array.isArray(q.options)) {
-      html += '<div class="options">';
-      q.options.forEach((opt, idx) => {
-        html += `<div class="option" data-idx="${idx}">${opt}</div>`;
-      });
-      html += '</div>';
-    } else {
-      // texte libre
-      html += `<input type="text" id="reponseLibre" class="zone-saisie" placeholder="Écris ta réponse...">`;
-    }
+    let html = `<div class="carte-question">`;
+
     if (modeActuel === 'cartes') {
-      html = `<div class="flashcard" id="flashcard">${q.question}<br><span style="font-size:1.2rem; display:block;">👆 cliquer pour voir</span></div>`;
+      // Mode CARTES : recto/verso
+      html += `<div class="flashcard" id="flashcard">`;
+      if (!flashRevele) {
+        html += `${q.question}<br><span class="indice-flash">👆 cliquer pour voir la réponse</span>`;
+      } else {
+        html += `<span class="reponse-flash">${q.bonne}</span>`;
+      }
+      html += `</div>`;
+    } else {
+      // Mode QUIZ ou ENTRAINEMENT
+      html += `<div class="question-texte">${q.question}</div>`;
+      if (q.options && Array.isArray(q.options)) {
+        html += '<div class="options">';
+        q.options.forEach((opt, idx) => {
+          html += `<div class="option" data-idx="${idx}">${opt}</div>`;
+        });
+        html += '</div>';
+      } else {
+        html += `<input type="text" id="reponseLibre" class="zone-saisie" placeholder="Écris ta réponse...">`;
+      }
     }
     html += '</div>';
     document.getElementById('contenuPrincipal').innerHTML = html;
+
     if (modeActuel === 'cartes') {
       document.getElementById('flashcard').addEventListener('click', function(){
-        this.innerHTML = `<span class="reponse-flash">${q.bonne}</span>`;
+        flashRevele = !flashRevele;
+        afficherQuestion(); // on rafraîchit pour montrer recto/verso
       });
     } else if (q.options) {
       document.querySelectorAll('.option').forEach(opt => {
@@ -477,14 +492,17 @@
     majStats();
   }
 
+  // Validation de la réponse (pour quiz et entrainement)
   function validerReponse() {
     if (reponseDonnee) return;
-    if (modeActuel === 'cartes') { 
-      alert('Clique sur la carte pour voir la réponse !'); 
-      return; 
+    if (modeActuel === 'cartes') {
+      alert('Utilise le clic sur la carte pour voir la réponse.');
+      return;
     }
+
     const q = historique[indexActuel];
     let bonne = false;
+
     if (q.options) {
       const selected = document.querySelector('.option.selected');
       if (!selected) { alert('Choisis une réponse !'); return; }
@@ -493,64 +511,72 @@
     } else {
       const input = document.getElementById('reponseLibre');
       if (!input) return;
-      const reponseUtilisateur = input.value.trim().toLowerCase().replace(/\s+/g,' ');
+      const reponseUtilisateur = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
       bonne = (reponseUtilisateur === q.bonne.toLowerCase());
     }
+
     if (bonne) score++;
     afficheExplication(q.explication || (bonne ? '✅ Bonne réponse !' : '❌ Revois la notion.'));
     reponseDonnee = true;
     majStats();
   }
 
+  // Passer à la question/carte suivante
   function questionSuivante() {
     if (modeActuel === 'cartes') {
-      if (indexActuel < historique.length - 1) indexActuel++; else indexActuel = 0;
-      afficherQuestion();
-      return;
-    }
-    // mode quiz ou entrainement
-    if (indexActuel < historique.length - 1) {
-      indexActuel++;
+      if (indexActuel < historique.length - 1) {
+        indexActuel++;
+      } else {
+        indexActuel = 0; // boucle
+      }
+      flashRevele = false; // nouvelle carte = recto
       afficherQuestion();
     } else {
-      // fin du quiz : on passe à l'écran récap (en incrémentant pour déclencher le recap)
-      indexActuel++; // pour que index == length
-      afficherQuestion(); // sera capté par la condition d'affichage récap
+      // quiz ou entrainement
+      if (indexActuel < historique.length - 1) {
+        indexActuel++;
+        afficherQuestion();
+      } else {
+        // fin du quiz
+        indexActuel++;
+        afficherQuestion(); // déclenche recap si mode quiz
+      }
     }
   }
-  
+
+  // Changer de mode (quiz, cartes, entrainement)
   function changerMode(mode) {
     modeActuel = mode;
     document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('actif'));
     document.querySelector(`[data-mode="${mode}"]`).classList.add('actif');
+
     historique = getQuestionsDuMode(mode);
     indexActuel = 0;
     score = 0;
     reponseDonnee = false;
-    
-    if (mode === 'quiz') {
-      // boutons valider / suivant
-      document.getElementById('navBottom').innerHTML = `
+    flashRevele = false;
+
+    // Configurer les boutons du bas
+    let navHTML = '';
+    if (mode === 'cartes') {
+      navHTML = `<button class="bouton-secondaire" id="btnSuivant">⏩ Carte suivante</button>`;
+    } else {
+      navHTML = `
         <button class="bouton-secondaire" id="btnValider">✅ Valider</button>
         <button class="bouton-secondaire" id="btnSuivant">⏩ Suivant</button>
       `;
-      document.getElementById('btnValider').addEventListener('click', validerReponse);
-      document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
-    } else if (mode === 'cartes') {
-      document.getElementById('navBottom').innerHTML = `<button class="bouton-secondaire" id="btnSuivant">⏩ Carte suivante</button>`;
-      document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
-    } else { // entrainement
-      document.getElementById('navBottom').innerHTML = `
-        <button class="bouton-secondaire" id="btnValider">✅ Valider</button>
-        <button class="bouton-secondaire" id="btnSuivant">⏩ Suivant</button>
-      `;
-      document.getElementById('btnValider').addEventListener('click', validerReponse);
-      document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
     }
+    document.getElementById('navBottom').innerHTML = navHTML;
+
+    if (mode !== 'cartes') {
+      document.getElementById('btnValider').addEventListener('click', validerReponse);
+    }
+    document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
+
     afficherQuestion();
   }
 
-  // initialisation
+  // Initialisation
   window.addEventListener('load', ()=>{
     changerMode('quiz');
   });
