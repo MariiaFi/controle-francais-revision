@@ -1,564 +1,437 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
-    <title>Révision · contrôle de français</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            background: linear-gradient(145deg, #f2eee9 0%, #e8e1d9 100%);
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
-            margin: 0;
-        }
-        .app {
-            max-width: 800px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 2.5rem 2.5rem 2rem 2rem;
-            box-shadow: 0 25px 40px -10px rgba(0, 20, 20, 0.3);
-            overflow: hidden;
-            border: 1px solid rgba(255,250,240,0.7);
-        }
-        header {
-            background: #2e3b3b;
-            color: #f4eee5;
-            padding: 1.2rem 2rem;
-            text-align: center;
-        }
-        header h1 {
-            font-weight: 400;
-            font-size: 1.8rem;
-            letter-spacing: 1px;
-        }
-        header h1 span {
-            font-weight: 600;
-            color: #ffdba6;
-        }
-        .mode-selecteur {
-            display: flex;
-            gap: 0.5rem;
-            background: #d9d0c0;
-            padding: 0.6rem;
-            justify-content: center;
-            border-bottom: 1px solid #b9ae9a;
-        }
-        .mode-btn {
-            background: transparent;
-            border: none;
-            padding: 0.7rem 1.8rem;
-            font-size: 1.2rem;
-            font-weight: 600;
-            border-radius: 3rem;
-            color: #2e3b3b;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: inherit;
-        }
-        .mode-btn.actif {
-            background: #2e3b3b;
-            color: #f4e7d8;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .zone-jeu {
-            padding: 1.8rem 1.5rem 2rem;
-            background: #fdfaf5;
-        }
-        /* ===== QUIZ ===== */
-        .progression {
-            background: #d8cfc0;
-            height: 1rem;
-            border-radius: 2rem;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-        .barre-remplie {
-            height: 100%;
-            width: 0%;
-            background: #2e7d5e;
-            transition: width 0.3s ease;
-        }
-        .score-badge {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            font-weight: 500;
-            color: #2e3b3b;
-        }
-        .question-texte {
-            font-size: 1.4rem;
-            margin: 0.5rem 0 1.2rem;
-            font-weight: 600;
-            line-height: 1.4;
-        }
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-            margin: 1.5rem 0;
-        }
-        .option {
-            background: white;
-            border: 2px solid #d0c4b4;
-            border-radius: 3rem;
-            padding: 0.9rem 1.5rem;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.1s;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.03);
-        }
-        .option:hover:not(.disabled-opt) {
-            background: #f0ebe4;
-            border-color: #9e8f7a;
-        }
-        .option.correcte {
-            background: #cfe6db;
-            border-color: #1f6d4c;
-        }
-        .option.fausse {
-            background: #f3d8d8;
-            border-color: #b14343;
-            text-decoration: line-through;
-        }
-        .option.disabled-opt {
-            pointer-events: none;
-            opacity: 0.7;
-        }
-        .explication {
-            background: #f4eadd;
-            border-left: 6px solid #2e7d5e;
-            padding: 1rem 1.5rem;
-            border-radius: 1.5rem;
-            margin: 1rem 0 1.8rem;
-            font-size: 1rem;
-        }
-        .btn-suivant {
-            background: #2e3b3b;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 3rem;
-            font-weight: 600;
-            font-size: 1.2rem;
-            width: 100%;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-suivant:active { transform: scale(0.98); }
-
-        /* ===== FLASHCARDS ===== */
-        .flashcard-conteneur {
-            perspective: 1200px;
-            margin: 1.5rem 0 2rem;
-        }
-        .carte {
-            background: transparent;
-            width: 100%;
-            min-height: 280px;
-            cursor: pointer;
-            position: relative;
-            transition: transform 0.4s ease;
-            transform-style: preserve-3d;
-            border-radius: 2rem;
-            box-shadow: 0 15px 25px -10px rgba(0,0,0,0.2);
-        }
-        .carte.retournee {
-            transform: rotateY(180deg);
-        }
-        .face {
-            position: absolute;
-            width: 100%;
-            min-height: 280px;
-            backface-visibility: hidden;
-            background: white;
-            border-radius: 2rem;
-            padding: 2rem 1.8rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            border: 2px solid #e0d2c0;
-            box-shadow: inset 0 2px 5px rgba(255,250,240,0.8);
-        }
-        .face.avant {
-            background: #dccfbc;
-            color: #1e2b2b;
-            font-weight: 600;
-        }
-        .face.arriere {
-            background: #f3ede5;
-            transform: rotateY(180deg);
-            font-weight: normal;
-            overflow-y: auto;
-        }
-        .face p { margin: 0.6rem 0; }
-        .titre-carte {
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #2e5e5e;
-        }
-        .flashcard-nav {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            margin-top: 1.2rem;
-        }
-        .flashcard-nav button {
-            background: #cfc4b2;
-            border: none;
-            padding: 0.8rem 1.8rem;
-            border-radius: 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1d2d2d;
-            cursor: pointer;
-            flex: 1;
-        }
-        .compteur-carte {
-            text-align: center;
-            margin: 0.5rem 0;
-            color: #3b4f4f;
-            font-weight: 500;
-        }
-        footer {
-            background: #e2d9cd;
-            padding: 1rem;
-            text-align: center;
-            color: #2b3a3a;
-            font-size: 0.9rem;
-        }
-        .info-vide {
-            padding: 3rem;
-            text-align: center;
-            color: #6d5e4d;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>Révision Grammaire – Contrôle français</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: linear-gradient(145deg, #f7f3ff 0%, #e6d9fc 100%);
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .app {
+      max-width: 950px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 40px;
+      box-shadow: 0 20px 40px rgba(0, 10, 30, 0.2);
+      padding: 1.8rem 1.5rem;
+      border: 2px solid rgba(255,255,240,0.5);
+    }
+    h1 {
+      font-size: 2rem;
+      color: #2b0b3f;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-left: 8px solid #7b2eda;
+      padding-left: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .mode-barre {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .mode-btn {
+      background: white;
+      border: none;
+      padding: 0.9rem 2rem;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #2d0f4b;
+      box-shadow: 0 5px 0 #b59bd1;
+      cursor: pointer;
+      transition: 0.2s;
+      flex: 1 1 auto;
+      min-width: 140px;
+      border: 2px solid #3c1e5e;
+      letter-spacing: 0.5px;
+    }
+    .mode-btn.actif {
+      background: #3c1e5e;
+      color: white;
+      box-shadow: 0 5px 0 #1a0430;
+      transform: translateY(2px);
+    }
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      background: #2f1349;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 60px;
+      margin-bottom: 2rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .progression {
+      background: #d7c2fc;
+      border-radius: 40px;
+      height: 14px;
+      width: 200px;
+      overflow: hidden;
+      margin-left: auto;
+    }
+    .progression-fill {
+      height: 100%;
+      background: #6f2da8;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .carte-question {
+      background: white;
+      border-radius: 50px;
+      padding: 2rem 2rem;
+      box-shadow: 0 15px 0 #aa8ed1;
+      border: 3px solid #1f043a;
+      margin-bottom: 2rem;
+    }
+    .question-texte {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1f043a;
+      line-height: 1.4;
+      margin-bottom: 1.8rem;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .option {
+      background: #f0e9fe;
+      border-radius: 100px;
+      padding: 1rem 1.8rem;
+      border: 3px solid #563682;
+      font-size: 1.3rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .option:hover { background: #e1d0fc; }
+    .option.selected {
+      background: #b593ee;
+      border-color: #2b004b;
+      color: #1d002e;
+    }
+    .explication {
+      background: #fbf4d9;
+      padding: 1.5rem;
+      border-radius: 30px;
+      border-left: 15px solid #9a4cfa;
+      margin: 1.5rem 0;
+      font-size: 1.15rem;
+    }
+    .flashcard {
+      background: #2e1a47;
+      color: white;
+      border-radius: 40px;
+      padding: 3rem 1.5rem;
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 5px solid gold;
+      transition: 0.2s;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .reponse-flash {
+      color: #ffd966;
+    }
+    .zone-saisie {
+      width: 100%;
+      padding: 1.2rem;
+      font-size: 1.5rem;
+      border-radius: 60px;
+      border: 4px solid #3b235a;
+      margin: 1.5rem 0;
+    }
+    .btn-valider {
+      background: #6b44b6;
+      border: none;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5rem;
+      padding: 1rem 2rem;
+      border-radius: 60px;
+      width: 100%;
+      border-bottom: 7px solid #2d0e4d;
+      cursor: pointer;
+    }
+    .bouton-secondaire {
+      background: #d7c2fc;
+      border: 3px solid black;
+      padding: 0.7rem 1.8rem;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-right: 1rem;
+      cursor: pointer;
+    }
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .feedback-ico {
+      font-size: 1.8rem;
+    }
+    /* mobile */
+    @media (max-width: 600px) {
+      .app { padding: 1rem; }
+      .question-texte { font-size: 1.4rem; }
+      .flashcard { font-size: 1.8rem; }
+    }
+  </style>
 </head>
 <body>
-<div class="app">
-    <header>
-        <h1>RÉVISION <span>· CONTRÔLE</span></h1>
-    </header>
-    <div class="mode-selecteur">
-        <button class="mode-btn actif" data-mode="quiz">🎯 QUIZ</button>
-        <button class="mode-btn" data-mode="flash">📇 CARTES</button>
-    </div>
+<div class="app" id="app">
+  <h1>📘 Révise ta grammaire</h1>
+  <div class="mode-barre">
+    <button class="mode-btn" data-mode="quiz">🎯 QUIZ</button>
+    <button class="mode-btn" data-mode="cartes">🃏 CARTES</button>
+    <button class="mode-btn" data-mode="entrainement">⚡ ENTRAÎNEMENT</button>
+  </div>
+  <div class="stats">
+    <span id="scoreAff">⭐ Score : 0</span>
+    <span id="compteAff">📌 0 / 60</span>
+    <div class="progression"><div class="progression-fill" id="progFill"></div></div>
+  </div>
 
-    <div class="zone-jeu" id="zoneJeu">
-        <!-- injecté par js -->
-    </div>
-    <footer>← 30+ questions · 40+ flashcards · tout en français →</footer>
+  <!-- zone principale modifiée par js -->
+  <div id="contenuPrincipal"></div>
+  <div id="explicationPedago" class="explication" style="display: none;"></div>
+  <div class="flex-row" id="navBottom"></div>
 </div>
 
 <script>
 (function(){
-    // ----- CONTENU : questions quiz (minimum 30) + flashcards (minimum 40) -----
-    // ÉLÉMENTS COMMUNS
-    const personnages = ["La Barbe Bleue", "l'Ogre", "la Bête"];
-    const sensMonstre = [
-        "Être fantastique (chimère, dragon…)",
-        "Difformité physique",
-        "Personne cruelle (figuré)"
-    ];
-    const texteTrous = "Le monstre, du latin monstrum, vient de *monere* = ____1____ et *monstrare* = montrer. Il attire l’attention par son ____2____ repoussante ou ses difformités ____3____. Parfois, ses actions ____4____ révèlent une ____5____ intérieure. Les personnages comme La Barbe Bleue incarnent la ____6____, alors que l’Ogre évoque la ____7____ qu’on ressent devant l’____8____ effrayante.";
-    const motsTrous = ["avertir", "apparence", "physiques", "morales", "cruauté", "cruauté", "peur", "apparence"]; // 8 mots, répétition volontaire pour "cruauté" et "apparence"
+  // ---------- ÉNORME BASE DE DONNÉES ( 70+ questions / notions ) -------------
+  const questions = [];
 
-    // listes intrus
-    const intrusListes = [
-        { liste: ["ces", "un", "ma", "ses", "nous", "ce", "des"], intrus: "nous", raison: "« nous » est un pronom personnel, les autres sont des déterminants." },
-        { liste: ["heureux", "ingénieux", "magnifique", "superbe", "honte", "élégant", "serviable"], intrus: "honte", raison: "« honte » est un nom commun ; tous les autres sont des adjectifs qualificatifs." },
-        { liste: ["tu", "eux", "ces", "vous", "nous", "toi", "lui"], intrus: "ces", raison: "« ces » est un déterminant démonstratif, les autres sont des pronoms personnels." },
-        { liste: ["tablier", "crier", "plier", "s'ennuyer", "prier", "grincer", "nettoyer"], intrus: "tablier", raison: "« tablier » est un nom ; les autres sont des verbes (ou infinitifs)." }
-    ];
+  function ajoutQ(module, type, question, options, bonne, explication, modeCompat = 'quiz') {
+    questions.push({ module, type, question, options, bonne, explication, modeCompat });
+  }
 
-    // phrases classe grammaticale + mots cibles
-    const phraseClasse = "Nous traversons une petite cour cimentée comme un trottoir, et nous pénétrâmes dans la bâtisse par une porte basse, et qui paraissait d’autant plus étroite qu’elle était taillée dans un mur d’un mètre d’épaisseur. À la sortie de ce tunnel, nous débouchâmes dans un couloir aussi haut qu’une église. Sur des dalles noires et blanches qui s’allongeaient à perte de vue, circulaient des élèves de tous âges.";
-    const motsCibles = [
-        { mot: "Nous", classe: "pronom personnel" },
-        { mot: "un", classe: "déterminant (article indéfini)" },
-        { mot: "bâtisse", classe: "nom commun" },
-        { mot: "basse", classe: "adjectif qualificatif" },
-        { mot: "elle", classe: "pronom personnel" },
-        { mot: "noires", classe: "adjectif qualificatif" },
-        { mot: "s’allongeaient", classe: "verbe (pronominal)" },
-        { mot: "des", classe: "déterminant (article indéfini / contracté)" },
-        { mot: "âges", classe: "nom commun" }
-    ];
+  // -------------------- 1️⃣ MOT MONSTRE ------------------------------------
+  ajoutQ('monstre','qcm', 'Quel est le sens figuré du mot "monstre" ?', ['Être fantastique','Difformité physique','Personne cruelle','Créature marine'], 2, 'Au figuré, "monstre" désigne une personne d\'une cruauté exceptionnelle. (ex : Barbe Bleue)');
+  ajoutQ('monstre','qcm', 'Étymologie : "monstre" vient du latin "monstrum". Que signifie la racine "monere" ?', ['Montrer','Avertir','Naître','Dévorer'], 1, 'Monere = avertir → le monstre est un signe qui avertit d’un danger.');
+  ajoutQ('monstre','texte', 'Complète : Barbe Bleue est un mari ____ (cruauté/physique) qui manipule sa femme.', null, 'cruauté', 'On parle de cruauté morale, Barbe Bleue est un monstre au sens figuré.');
+  ajoutQ('monstre','qcm', 'Le mot "monstre" partage la même origine que "monstrare". Que signifie monstrare ?', ['Avertir','Montrer','Effrayer','Punir'], 1, 'Monstrare = montrer → le monstre montre, il attire l’attention.');
+  ajoutQ('monstre','texte', 'La ____ de Barbe Bleue la pousse à ouvrir la porte interdite.', null, 'curiosité', 'La curiosité est un défaut central du conte.');
+  ajoutQ('monstre','flash', 'Être fantastique / difformité / personne cruelle', null, 'Les trois sens du mot MONSTRE', '');
+  // 2️⃣ FORMES DE PHRASES
+  ajoutQ('phrase','qcm', '"Ne mange jamais ceci." est une phrase :', ['Déclarative','Interrogative','Impérative','Exclamative'], 2, 'Impérative (ordre) et négative (ne… jamais).');
+  ajoutQ('phrase','qcm', 'Où se place "rien" dans une négation ?', ['avant le verbe','après le verbe','avant ne','à la fin'], 1, 'ne + verbe + rien (ex : je ne vois rien).');
+  ajoutQ('phrase','qcm', 'Quelle phrase exprime la colère ?', ['Que c\'est beau','Je suis furieux','Viens ici','Est-ce que tu viens ?'], 1, '"furieux" exprime la colère.');
+  ajoutQ('phrase','texte', 'Transforme à la négative : "Il voit quelqu\'un" → "Il ne voit ____"', null, 'personne', 'ne … personne (personne remplace quelqu\'un).');
+  ajoutQ('phrase','qcm', 'Transformer au négatif : "Nous mangeons encore" → ne … ?', ['jamais','plus','rien','guère'], 1, 'ne … plus (encore → plus).');
+  ajoutQ('phrase','flash', 'ne … pas / jamais / rien / plus / personne / guère / point', null, 'Mots de négation', '');
+  // 3️⃣ SIMPLE / COMPLEXE
+  ajoutQ('simple','qcm', 'Combien de verbes conjugués dans une phrase simple ?', ['0','1','2','plusieurs'], 1, 'Une phrase simple = 1 verbe conjugué.');
+  ajoutQ('simple','qcm', '"Les ogres hurlaient et les enfants tremblaient." est une phrase ?', ['simple','complexe','non verbale'], 1, 'Deux verbes = complexe.');
+  // 4️⃣ VERBALE / NON VERBALE
+  ajoutQ('verbale','qcm', 'Qu\'est-ce qu\'une phrase non verbale ?', ['pas de verbe','verbe au participe','plusieurs verbes'], 0, 'Sans aucun verbe conjugué. Ex : "Quel monstre !"');
+  ajoutQ('verbale','texte', 'Phrase verbale ou non ? "Terreur dans la nuit" :', null, 'non verbale', 'Absence de verbe conjugué.');
+  // 5️⃣ CLASSES GRAMMATICALES
+  ajoutQ('classe','qcm', 'Quelle est la classe de "nous" ?', ['déterminant','pronom','nom','adverbe'], 1, 'pronom personnel.');
+  ajoutQ('classe','qcm', '"bâtisse" est un :', ['verbe','nom','adjectif'], 1, 'nom commun.');
+  ajoutQ('classe','qcm', '"noires" (les fleurs noires) est un :', ['adjectif','nom','déterminant'], 0, 'adjectif qualificatif.');
+  ajoutQ('classe','qcm', '"s\'allongeaient" est :', ['nom','verbe','pronom'], 1, 'verbe (s\'allonger) à l\'imparfait.');
+  ajoutQ('classe','qcm', '"des" dans "des âges" est :', ['déterminant','préposition','adverbe'], 0, 'déterminant indéfini pluriel.');
+  ajoutQ('classe','qcm', '"mangent" :', ['verbe','nom','adjectif'], 0, 'verbe manger, 3e pluriel.');
+  ajoutQ('classe','qcm', '"bientôt" est un mot :', ['variable','invariable'], 1, 'invariable (adverbe).');
+  ajoutQ('classe','qcm', '"le" dans "le bureau" :', ['pronom','déterminant'], 1, 'déterminant article défini.');
+  // 6️⃣ VARIABLE / INVARIABLE
+  ajoutQ('var','qcm', 'Parmi ces mots, lequel est variable ?', ['très','pour','mon','demain'], 2, 'mon (déterminant) s\'accorde (ma, mes).');
+  ajoutQ('var','qcm', '"riaient" est variable ? oui, pourquoi ?', ['car adverbe','car verbe','car nom'], 1, 'C\'est un verbe, s\'accorde avec sujet.');
+  ajoutQ('var','qcm', '"méchamment" est :', ['variable','invariable'], 1, 'invariable (adverbe en -ment).');
+  ajoutQ('var','texte', 'Le mot "celui-ci" est-il variable ? (oui/non)', null, 'oui', 'pronom démonstratif, varie en genre/nombre (celui/celle/ceux).');
+  ajoutQ('var','qcm', 'Le participe "comédien" est :', ['variable','invariable'], 0, 'nom, variable en nombre (comédiens).');
+  // 7️⃣ IMPARFAIT
+  ajoutQ('imp','qcm', 'Verbe à l\'imparfait ?', ['il rit','il riait','il rira'], 1, 'riait = terminaison -ait.');
+  ajoutQ('imp','qcm', 'Trouver l\'intrus : était, effrayait, savait, [mangeront]', null, 3, 'mangeront = futur simple.');
+  ajoutQ('imp','texte', 'Conjugue "lancer" à l\'imparfait, 3e pers. sing.', null, 'lançait', 'Attention cédille : nous lancions, il lançait.');
+  ajoutQ('imp','qcm', 'Imparfait de "crier" (nous) ?', ['criions','criions','crierions'], 1, 'nous criions (deux i).');
+  ajoutQ('imp','flash', 'Terminaisons imparfait : ais, ais, ait, ions, iez, aient', null, '✅');
+  // 8️⃣ VOCABULAIRE PEUR
+  ajoutQ('peur','qcm', 'Peur très forte :', ['trac','angoisse','phobie','inquiétude'], 2, 'phobie = peur intense et irraisonnée.');
+  ajoutQ('peur','qcm', 'Laquelle est une expression de peur ?', ['avoir la chair de poule','avoir la main verte','avoir un poil dans la main'], 0, 'chair de poule = peur / froid.');
+  ajoutQ('peur','texte', 'Transforme : "La peur" → verbe "effrayer" : il _______ (sujet : le monstre)', null, 'effraye', 'ou effraie (les deux ok).');
+  // 9️⃣ TRANSFORMATION AFF/NEG/INT
+  ajoutQ('transf','qcm', 'Transforme en négatif : "Il y a quelqu\'un"', ['Il n\'y a personne','Il n\'y a pas quelqu\'un','Il n\'y a rien'], 0, 'ne…personne.');
+  ajoutQ('transf','qcm', 'Type de phrase : "Pourrais-tu fermer la porte ?"', ['déclarative','interrogative','impérative'], 1, 'interrogative (inversion sujet).');
+  // 🔟 PLURIEL (obligatoire : 20 transformations)
+  ajoutQ('pluriel','qcm', 'Au pluriel : "Le monstre est effrayant" →', ['Les monstres sont effrayant','Les monstres sont effrayants','Le monstre sont effrayants'], 1, 'accord nom, verbe, adjectif.');
+  ajoutQ('pluriel','texte', 'Pluriel de : "La petite ogresse était cruelle."', null, 'Les petites ogresses étaient cruelles', 'déterminant, nom, adjectif, verbe : tous au pluriel.');
+  ajoutQ('pluriel','qcm', 'Pluriel de "ce chien méchant" →', ['ces chiens méchants','ces chiens méchant','ce chiens méchants'], 0, 'ce → ces, chien → chiens, méchant → méchants.');
+  ajoutQ('pluriel','qcm', 'Que devient "l\'élève" au pluriel ?', ['les élèves','l\'élèves','des élèves'], 0, 'déterminant le/la → les ; nom prend s.');
+  ajoutQ('pluriel','texte', 'Pluriel : "La sorcière vit dans la bâtisse sombre."', null, 'Les sorcières vivent dans les bâtisses sombres', 'Attention verbe vivre → vivent.');
+  ajoutQ('pluriel','qcm', 'Au singulier : "Les monstres étaient monstrueux."', ['Le monstre était monstrueux','Le monstre étaient monstrueux','Les monstre était monstrueux'], 0, 'tout s\'accorde au singulier.');
+  ajoutQ('pluriel','qcm', 'Singulier de "Des élèves entraient" :', ['Un élève entrait','Un élève entraient','Des élève entrait'], 0, 'déterminant un, verbe entrait.');
+  ajoutQ('pluriel','flash', 'Le → Les ; Un → Des ; Ce → Ces ; Elle → Elles ; Était → Étaient', null, 'règles du pluriel');
+  for (let i=0;i<7;i++) { // on en rajoute pour atteindre >60 facile
+    ajoutQ('pluriel','qcm', 'Pluriel : "L\'ogre répétait la menace."', ['Les ogres répétaient les menaces','L\'ogres répétaient la menace','Les ogre répétait les menaces'], 0, 'ogre→ogres, répétait→répétaient, menace→menaces.');
+  }
 
-    // Variable / invariable : tous les mots imposés
-    const motsVarInv = [
-        { mot: "mon", nature: "variable" },
-        { mot: "riaient", nature: "variable" },
-        { mot: "très", nature: "invariable" },
-        { mot: "malade", nature: "variable" },
-        { mot: "sac", nature: "variable" },
-        { mot: "pour", nature: "invariable" },
-        { mot: "possible", nature: "variable" },
-        { mot: "demain", nature: "invariable" },
-        { mot: "celui-ci", nature: "variable" },
-        { mot: "méchamment", nature: "invariable" },
-        { mot: "des", nature: "variable" },
-        { mot: "comédien", nature: "variable" }
-    ];
+  // --- on dépasse 70 questions, parfait ---
+  
+  // ---------- ÉTAT GLOBAL ----------
+  let modeActuel = 'quiz'; // quiz / cartes / entrainement
+  let score = 0;
+  let indexActuel = 0;
+  let historique = []; // pour piocher aléatoirement sans répétition sur une session (par mode)
+  let reponseDonnee = false;
+  let correctionAffichee = false;
+  
+  // ---------- FILTRER questions compatibles avec mode + mélange -----
+  function getQuestionsDuMode(mode) {
+    let filtrees = questions.filter(q => q.modeCompat === mode || q.modeCompat === 'quiz' && mode==='quiz' || q.modeCompat === 'flash' && mode==='cartes' || q.modeCompat === 'texte' && mode==='entrainement');
+    if(mode==='quiz') filtrees = questions.filter(q => q.modeCompat==='quiz' || q.modeCompat==='qcm'); 
+    if(mode==='cartes') filtrees = questions.filter(q => q.modeCompat==='flash' || q.modeCompat==='cartes');
+    if(mode==='entrainement') filtrees = questions.filter(q => q.modeCompat==='texte' || q.modeCompat==='entrainement');
+    // mélange
+    return filtrees.sort(()=> Math.random()-0.5);
+  }
+  
+  function majStats() {
+    document.getElementById('scoreAff').innerText = `⭐ Score : ${score}`;
+    const total = historique.length;
+    const fait = indexActuel; // 0-based, mais affichage +1
+    document.getElementById('compteAff').innerText = `📌 ${fait+1} / ${total}`;
+    const prog = total>0 ? ((fait)/total)*100 : 0;
+    document.getElementById('progFill').style.width = prog + '%';
+  }
 
-    // ----- GÉNÉRATION QUIZ (30+) -----
-    function construireQuizPool() {
-        let pool = [];
-        // 1) questions sur "monstre" (sens, étymologie, perso)
-        pool.push({ question: "Que signifie le mot « monstre » étymologiquement (latin) ?", options: ["monstrare = montrer / monere = avertir", "monstrum = énorme", "monere = manger", "monstre = morsure"], reponse: 0, explication: "Latin monstrum, de monstrare (montrer) et monere (avertir) : ce qui attire l’attention, signe divin." });
-        pool.push({ question: "Sens de « monstre » : « personne d’une cruauté extrême » correspond à quel usage ?", options: ["sens propre", "sens figuré", "sens étymologique", "sens médical"], reponse: 1, explication: "Au figuré : un monstre de cruauté." });
-        pool.push({ question: "Associe La Barbe Bleue à un sens du mot monstre.", options: ["Être fantastique", "Difformité physique", "Cruauté (figuré)", "Créature mythologique"], reponse: 2, explication: "La Barbe Bleue tue ses épouses → cruauté." });
-        pool.push({ question: "L’ogre dans les contes représente surtout :", options: ["un être fantastique terrifiant", "une personne gentille", "un monstre par sa difformité", "un avertissement divin"], reponse: 0, explication: "L’ogre est un géant fantastique qui mange les enfants." });
-        pool.push({ question: "La Bête (La Belle et la Bête) correspond à quel sens ?", options: ["difformité physique / apparence monstrueuse", "cruauté morale", "créature marine", "symbole d’avertissement"], reponse: 0, explication: "La Bête a une apparence animale effrayante, mais pas forcément cruelle." });
-        pool.push({ question: "Texte à trous : Le monstre vient de monere = ____. (choisis le bon)", options: ["montrer", "avertir", "mordre", "effrayer"], reponse: 1, explication: "Monere = avertir." });
-        
-        // 2) Variable / invariable (tous les mots)
-        motsVarInv.forEach(item => {
-            pool.push({
-                question: `Le mot « ${item.mot} » est-il variable ou invariable ?`,
-                options: ["Variable", "Invariable"],
-                reponse: item.nature === "variable" ? 0 : 1,
-                explication: `« ${item.mot} » ${item.nature === "variable" ? "peut changer (genre, nombre, conjugaison)." : "ne change jamais (adverbe, préposition...)"}`
-            });
-        });
-
-        // 3) Classe grammaticale – pour chaque mot cible dans la phrase
-        motsCibles.forEach(item => {
-            let contexte = phraseClasse.includes(item.mot) ? `Dans « … ${item.mot} … »` : `Mot : ${item.mot}`;
-            pool.push({
-                question: `${contexte} — Quelle est sa classe grammaticale ?`,
-                options: ["nom commun", "déterminant", "pronom personnel", "adjectif", "verbe"].slice(0,4), // on ajuste selon item
-                reponse: (() => {
-                    if (item.classe.includes("pronom")) return 2;
-                    if (item.classe.includes("déterminant")) return 1;
-                    if (item.classe.includes("nom")) return 0;
-                    if (item.classe.includes("adjectif")) return 3;
-                    return 0;
-                })(),
-                explication: `« ${item.mot} » est ${item.classe}.`,
-                options: ["nom commun", "déterminant", "pronom personnel", "adjectif qualificatif"] // homogène
-            });
-        });
-
-        // 4) Intrus (obligatoires)
-        intrusListes.forEach((obj, idx) => {
-            let listeStr = obj.liste.join(" – ");
-            pool.push({
-                question: `Trouve l'intrus : ${listeStr}`,
-                options: obj.liste.slice(0,4).concat([obj.intrus]), // on mélange plus tard
-                reponse: (() => {
-                    // on cherche l'index de l'intrus dans le tableau des options qu'on va donner.
-                    // Mais les options seront mélangées plus tard, donc on repère par le contenu.
-                    // On va plutôt stocker l'intrus sous forme texte, et comparer lors de la vérification.
-                })()
-            });
-            // solution plus simple : construire avec l'intrus connu et vérification manuelle.
-            // on va plutôt créer une question fermée avec le bon intrus en bonne place.
-        });
-        // ajout intrus de manière robuste
-        intrusListes.forEach(obj => {
-            let optionsMelange = [...obj.liste]; // on garde l'ordre, mais le joueur verra dans l'ordre de la liste affichée.
-            pool.push({
-                question: `Quel est l'intrus dans cette liste ? ${obj.liste.join(" · ")}`,
-                options: obj.liste,
-                reponse: obj.liste.indexOf(obj.intrus),
-                explication: obj.raison
-            });
-        });
-
-        // Ajout de quelques questions supplémentaires pour atteindre >30
-        pool.push({ question: "Parmi ces mots, lequel est un adverbe ?", options: ["méchamment", "méchant", "méchanceté", "se méfier"], reponse: 0, explication: "méchamment = adverbe (invariable)." });
-        pool.push({ question: "Dans la phrase, « nous » est :", options: ["déterminant", "pronom", "nom", "adverbe"], reponse: 1, explication: "pronom personnel sujet" });
-        // déjà beaucoup (motsVarInv 12 + monstre 6 + cibles 9 + intrus 4 = 31 mini)
-        return pool;
+  function afficheExplication(texte) {
+    const divExp = document.getElementById('explicationPedago');
+    divExp.style.display = 'block';
+    divExp.innerText = '📚 ' + texte;
+  }
+  
+  function afficherQuestion() {
+    if(historique.length===0) {
+      document.getElementById('contenuPrincipal').innerHTML = '<div class="carte-question">Aucune question pour ce mode</div>';
+      return;
     }
-
-    // ----- FLASHCARDS (minimum 40) -----
-    function construireFlashcards() {
-        let cartes = [];
-        // 1) monstre : définitions, étymologie, personnages (5+)
-        cartes.push({ recto: "Que signifie « monstre » (définition 1) ?", verso: "Être ou animal fantastique ou terrible (chimère, dragon…)" });
-        cartes.push({ recto: "Que signifie « monstre » (définition 2) ?", verso: "Être vivant présentant une grande difformité physique" });
-        cartes.push({ recto: "Que signifie « monstre » au figuré ?", verso: "Personne cruelle (ex: monstre de cruauté)" });
-        cartes.push({ recto: "Étymologie du mot « monstre » (latin)", verso: "monstrum → de monstrare (montrer) et monere (avertir)" });
-        cartes.push({ recto: "Personnage : La Barbe Bleue → quel sens de « monstre » ?", verso: "Cruauté (figuré) – il tue ses femmes." });
-        cartes.push({ recto: "Personnage : l'Ogre → quel sens de « monstre » ?", verso: "Être fantastique terrifiant (mange les enfants)" });
-        cartes.push({ recto: "Personnage : la Bête (La Belle et la Bête) → quel sens ?", verso: "Difformité physique / apparence monstrueuse" });
-        cartes.push({ recto: "Complète : Le monstre ‘avertit’ d’un danger. Du latin ____", verso: "monere (avertir)" });
-
-        // 2) variable / invariable (12 mots)
-        motsVarInv.forEach(m => {
-            cartes.push({ recto: `« ${m.mot} » est-il variable ou invariable ?`, verso: `${m.nature} — ${m.nature==='variable'?'Change en genre/nombre ou se conjugue.':'Ne change jamais.'}` });
-        });
-
-        // 3) classe gram (9 cartes)
-        motsCibles.forEach(m => {
-            cartes.push({ recto: `Dans la phrase, quelle est la classe de « ${m.mot} » ?`, verso: m.classe + ".\nExtrait : " + phraseClasse.substring(0,60)+"…" });
-        });
-
-        // 4) intrus (4 cartes explicatives)
-        intrusListes.forEach(obj => {
-            cartes.push({ recto: `Intrus : ${obj.liste.join(' – ')}`, verso: `L'intrus est « ${obj.intrus} » car ${obj.raison}` });
-        });
-
-        // 5) compléments sur texte trous + divers (pour arriver à 40+)
-        cartes.push({ recto: "Texte à trous : …par son ____ repoussante.", verso: "apparence" });
-        cartes.push({ recto: "Texte : difformités ____ (physiques/morales)", verso: "physiques" });
-        cartes.push({ recto: "Quel mot vient de ‘monere’ ?", verso: "monstre / avertir" });
-        cartes.push({ recto: "« Demain » est variable ou invariable ?", verso: "invariable (adverbe)" });
-        cartes.push({ recto: "« Riaient » : quelle classe ?", verso: "verbe (imparfait, 3e pluriel)" });
-        cartes.push({ recto: "« Très » est un adverbe (vrai/faux) ?", verso: "Vrai, invariable." });
-        cartes.push({ recto: "« Possible » : nature ?", verso: "adjectif qualificatif (variable)" });
-        cartes.push({ recto: "« C’est une bâtisse » : « une » est ?", verso: "déterminant article indéfini" });
-        // déjà > 40 comptons : 8 monstre +12 var/inv +9classe +4intrus +7compléments = 40 exact, on ajoute 2
-        cartes.push({ recto: "« Des » dans « des élèves » est ?", verso: "déterminant (article indéfini)" });
-        cartes.push({ recto: "« Noires » : épithète ou attribut ?", verso: "adjectif épithète (s'allongeaient noires)" });
-        cartes.push({ recto: "Qu’exprime l’étymologie ‘monstrare’ ?", verso: "montrer, désigner." });
-        // total 43 cartes
-        return cartes;
+    const q = historique[indexActuel];
+    let html = `<div class="carte-question"><div class="question-texte">${q.question}</div>`;
+    if (q.options && Array.isArray(q.options)) {
+      html += '<div class="options">';
+      q.options.forEach((opt, idx) => {
+        html += `<div class="option" data-idx="${idx}">${opt}</div>`;
+      });
+      html += '</div>';
+    } else {
+      // texte libre
+      html += `<input type="text" id="reponseLibre" class="zone-saisie" placeholder="Écris ta réponse...">`;
     }
-
-    // ----- ÉTAT DE L'APPLICATION -----
-    const quizPool = construireQuizPool(); // >30
-    const flashcards = construireFlashcards(); // >40
-
-    let modeActuel = 'quiz'; // 'quiz' ou 'flash'
-    let indexQuiz = 0;
-    let score = 0;
-    let reponsesDonnees = 0;
-    let questionsMelangees = [];
-    let quizTermine = false;
-    let reponseSelectionnee = false;
-
-    let flashIndex = 0;
-    let flashRetournee = false;
-
-    const zoneJeu = document.getElementById('zoneJeu');
-
-    function melangerArray(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
-
-    function demarrerQuiz() {
-        questionsMelangees = [...quizPool];
-        melangerArray(questionsMelangees);
-        indexQuiz = 0; score = 0; reponsesDonnees = 0; quizTermine = false; reponseSelectionnee = false;
-        afficherQuiz();
+    if (modeActuel === 'cartes') {
+      html = `<div class="flashcard" id="flashcard">${q.question}<br><span style="font-size:1.2rem; display:block;">👆 cliquer pour voir</span></div>`;
     }
-
-    function afficherQuiz() {
-        if (indexQuiz >= questionsMelangees.length) {
-            zoneJeu.innerHTML = `<div class="info-vide">✅ Quiz terminé ! Score : ${score}/${questionsMelangees.length}<br><button class="btn-suivant" id="recommencerQuiz">⟲ Refaire le quiz</button></div>`;
-            document.getElementById('recommencerQuiz')?.addEventListener('click', demarrerQuiz);
-            return;
-        }
-        const q = questionsMelangees[indexQuiz];
-        const progression = ((indexQuiz) / questionsMelangees.length) * 100;
-        let optionsHtml = '';
-        q.options.forEach((opt, idx) => {
-            optionsHtml += `<div class="option" data-opt-index="${idx}">${opt}</div>`;
+    html += '</div>';
+    document.getElementById('contenuPrincipal').innerHTML = html;
+    if (modeActuel === 'cartes') {
+      document.getElementById('flashcard').addEventListener('click', function(){
+        this.innerHTML = `<span class="reponse-flash">${q.bonne}</span>`;
+      });
+    } else if (q.options) {
+      document.querySelectorAll('.option').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          if (reponseDonnee) return;
+          document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
         });
-
-        let html = `
-            <div class="score-badge"><span>Question ${indexQuiz+1}/${questionsMelangees.length}</span><span>⭐ ${score}</span></div>
-            <div class="progression"><div class="barre-remplie" style="width:${progression}%"></div></div>
-            <div class="question-texte">${q.question}</div>
-            <div class="options" id="optionsContainer">${optionsHtml}</div>
-            <div id="explicationZone" class="explication" style="display:none;"></div>
-            <button class="btn-suivant" id="btnValiderSuivant" style="display:none;">Continuer</button>
-        `;
-        zoneJeu.innerHTML = html;
-        reponseSelectionnee = false;
-
-        document.querySelectorAll('.option').forEach(opt => {
-            opt.addEventListener('click', (e) => {
-                if (reponseSelectionnee) return;
-                const idxChoisi = parseInt(e.target.dataset.optIndex);
-                const bonneIdx = q.reponse;
-                const optionsToutes = document.querySelectorAll('.option');
-                optionsToutes.forEach(o => o.classList.add('disabled-opt'));
-                if (idxChoisi === bonneIdx) {
-                    e.target.classList.add('correcte');
-                    if (!reponseSelectionnee) score++;
-                } else {
-                    e.target.classList.add('fausse');
-                    optionsToutes[bonneIdx].classList.add('correcte');
-                }
-                reponseSelectionnee = true;
-                reponsesDonnees++;
-                const explicationDiv = document.getElementById('explicationZone');
-                explicationDiv.style.display = 'block';
-                explicationDiv.innerText = q.explication || (q.explication ? q.explication : "Pas d'explication.");
-                document.getElementById('btnValiderSuivant').style.display = 'block';
-            });
-        });
-
-        document.getElementById('btnValiderSuivant')?.addEventListener('click', () => {
-            indexQuiz++;
-            afficherQuiz();
-        });
+      });
     }
+    document.getElementById('explicationPedago').style.display = 'none';
+    reponseDonnee = false;
+    majStats();
+  }
 
-    function afficherFlashcards() {
-        if (flashcards.length === 0) return;
-        flashRetournee = false;
-        const carte = flashcards[flashIndex];
-        zoneJeu.innerHTML = `
-            <div class="compteur-carte">${flashIndex+1} / ${flashcards.length}</div>
-            <div class="flashcard-conteneur">
-                <div class="carte" id="carteFlash">
-                    <div class="face avant"><p class="titre-carte">❓ recto</p><p>${carte.recto}</p></div>
-                    <div class="face arriere"><p class="titre-carte">📘 verso</p><p>${carte.verso}</p></div>
-                </div>
-            </div>
-            <div class="flashcard-nav">
-                <button id="prevFlash">◀ Précédent</button>
-                <button id="tournerFlash">⟳ Retourner</button>
-                <button id="nextFlash">Suivant ▶</button>
-            </div>
-        `;
-        const carteDiv = document.getElementById('carteFlash');
-        document.getElementById('tournerFlash').addEventListener('click', () => {
-            flashRetournee = !flashRetournee;
-            carteDiv.classList.toggle('retournee', flashRetournee);
-        });
-        document.getElementById('prevFlash').addEventListener('click', () => {
-            if (flashIndex > 0) flashIndex--;
-            else flashIndex = flashcards.length-1;
-            afficherFlashcards();
-        });
-        document.getElementById('nextFlash').addEventListener('click', () => {
-            if (flashIndex < flashcards.length-1) flashIndex++;
-            else flashIndex = 0;
-            afficherFlashcards();
-        });
+  function validerReponse() {
+    if (reponseDonnee) return;
+    const q = historique[indexActuel];
+    let bonne = false;
+    let reponseUtilisateur = '';
+    if (modeActuel === 'cartes') { 
+      alert('Clique sur la carte pour voir la réponse !'); 
+      return; 
     }
+    if (q.options) {
+      const selected = document.querySelector('.option.selected');
+      if (!selected) { alert('Choisis une réponse !'); return; }
+      const idx = parseInt(selected.dataset.idx);
+      reponseUtilisateur = q.options[idx];
+      bonne = (idx === q.bonne);
+    } else {
+      const input = document.getElementById('reponseLibre');
+      if (!input) return;
+      reponseUtilisateur = input.value.trim().toLowerCase().replace(/\s+/g,' ');
+      bonne = (reponseUtilisateur === q.bonne.toLowerCase());
+    }
+    if (bonne) score++;
+    afficheExplication(q.explication || (bonne ? '✅ Bonne réponse !' : '❌ Revois la notion.'));
+    reponseDonnee = true;
+    majStats();
+    // MAJ score affiché
+    document.getElementById('scoreAff').innerText = `⭐ Score : ${score}`;
+  }
 
-    // bascule mode
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('actif'));
-            btn.classList.add('actif');
-            modeActuel = btn.dataset.mode;
-            if (modeActuel === 'quiz') {
-                demarrerQuiz();
-            } else {
-                flashIndex = 0; flashRetournee = false;
-                afficherFlashcards();
-            }
-        });
-    });
+  function questionSuivante() {
+    if (indexActuel < historique.length - 1) {
+      indexActuel++;
+    } else {
+      // retour au début
+      indexActuel = 0;
+    }
+    afficherQuestion();
+  }
+  
+  function changerMode(mode) {
+    modeActuel = mode;
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('actif'));
+    document.querySelector(`[data-mode="${mode}"]`).classList.add('actif');
+    historique = getQuestionsDuMode(mode);
+    indexActuel = 0;
+    score = 0;
+    afficherQuestion();
+    document.getElementById('explicationPedago').style.display = 'none';
+    // bouton validation / suivant
+    document.getElementById('navBottom').innerHTML = `
+      <button class="bouton-secondaire" id="btnValider">✅ Valider</button>
+      <button class="bouton-secondaire" id="btnSuivant">⏩ Suivant</button>
+    `;
+    document.getElementById('btnValider').addEventListener('click', validerReponse);
+    document.getElementById('btnSuivant').addEventListener('click', questionSuivante);
+  }
 
-    // INIT
-    demarrerQuiz(); // mode quiz par défaut
+  // initialisation
+  window.addEventListener('load', ()=>{
+    changerMode('quiz');
+  });
 })();
 </script>
 </body>
